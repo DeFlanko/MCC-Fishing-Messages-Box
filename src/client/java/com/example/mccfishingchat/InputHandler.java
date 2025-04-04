@@ -8,30 +8,47 @@ import org.lwjgl.glfw.GLFW;
 
 public class InputHandler {
     private static KeyBinding toggleVisibilityKey;
-    private static KeyBinding quickNDirtyF3ToggleKey;
-    
+    private static KeyBinding increaseFontSize;
+    private static KeyBinding decreaseFontSize;
+
+
     public static void init() {
         // Register keybinding to toggle chat box visibility
         toggleVisibilityKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-            "MCC Fish Chatbox Toggle",
-            InputUtil.Type.KEYSYM,
-            GLFW.GLFW_KEY_F9,
-            "MCC Fishing Chat"
+                "MCC Fish Chatbox Toggle",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_F9,
+                "MCC Fishing Messages"
         ));
 
-        quickNDirtyF3ToggleKey= KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "MCC F3 Toggle",
+
+        increaseFontSize = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "Increase Font Size",
                 InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_F3,
+                GLFW.GLFW_KEY_RIGHT_BRACKET,
                 "MCC Fishing Chat"
         ));
-        
+        decreaseFontSize = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "Decrease Font Size",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_LEFT_BRACKET,
+                "MCC Fishing Messages"
+        ));
+
         // Register mouse handlers through Fabric's event system
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (toggleVisibilityKey.wasPressed()||quickNDirtyF3ToggleKey.wasPressed()) {
+            while (toggleVisibilityKey.wasPressed()) {
                 // Toggle chat box visibility
-                MCCFishingChatMod.fishingChatBox.toggleVisibility();
+                MCCFishingMessagesMod.fishingChatBox.toggleVisibility();
             }
+
+            while (increaseFontSize.wasPressed()){
+                MCCFishingMessagesMod.fishingChatBox.changeFontSize(0.05f);
+            }
+            while (decreaseFontSize.wasPressed()){
+                MCCFishingMessagesMod.fishingChatBox.changeFontSize(-0.05f);
+            }
+
         });
     }
 }

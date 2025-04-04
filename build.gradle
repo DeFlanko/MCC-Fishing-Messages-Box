@@ -3,13 +3,16 @@ plugins {
     id 'maven-publish'
 }
 
-version = '1.0.0+1.21.3'
+version = '1.0.4+1.21.3'
 group = 'com.example'
 archivesBaseName = 'mcc-fishing-chat'
 
 repositories {
     mavenCentral()
-	
+	maven {
+		name = "Xander"
+		url = "https://maven.isxander.dev/releases"
+	}
 }
 loom {
 	splitEnvironmentSourceSets()
@@ -38,6 +41,7 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 	
 }
 
