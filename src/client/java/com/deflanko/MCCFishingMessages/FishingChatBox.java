@@ -78,10 +78,10 @@ public class FishingChatBox {
             title = "";
         } //sets title to none if box width is smaller than everything.
         context.drawText(client.textRenderer, title, boxX + 5, boxY + 5, 0xFFFFFFFF, true);
-        context.drawText(client.textRenderer, cords, boxWidth - (client.textRenderer.getWidth(cords) + 20), boxY + 5, 0xFFA000, true);
+        context.drawText(client.textRenderer, cords, (boxX + boxWidth) - (client.textRenderer.getWidth(cords) + 20), boxY + 5, 0xFFA000, true);
 
         // Add clipboard icon
-        int iconX = (boxWidth - 10);
+        int iconX = boxX + (boxWidth - 10);
         context.drawText(client.textRenderer, COPY_ICON, iconX, boxY + 5, COPY_ICON_COLOR, true);
 
         // Check if mouse is hovering over icon
@@ -98,6 +98,7 @@ public class FishingChatBox {
 
         //Draw messages
         int yOffset = (int)((boxY + boxHeight)/fontSize) - MESSAGE_HEIGHT; // Start at bottom of box
+        int xOffset = (int)(boxX/fontSize);
         int visibleCount = 0;
         maxVisibleMessages = (int)((boxHeight - 18)/fontSize)/MESSAGE_HEIGHT;
         List<ChatMessage> visibleMessages = new ArrayList<>(messages);
@@ -114,7 +115,7 @@ public class FishingChatBox {
                     continue;
                 }
                 localSize++;
-                context.drawText(client.textRenderer, line, boxX + 5, yOffset, 0xFFFFFFFF, true);
+                context.drawText(client.textRenderer, line, xOffset + 5 , yOffset, 0xFFFFFFFF, true);
                 if( message.size < localSize){
                     message.size = localSize;
                 }
@@ -161,18 +162,6 @@ public class FishingChatBox {
         }
     }
 
-    private int findMessageIndex(double mouseX, double mouseY){
-        int i =5000;
-        if(visible && mouseX >= boxX && mouseX <= (boxX + boxWidth)*guiScaleFactor &&
-                mouseY >= (boxY + 20)*guiScaleFactor && mouseY <= (boxY + boxHeight-1)*guiScaleFactor && client.inGameHud.getChatHud().isChatFocused()) {
-            mouseY = mouseY/guiScaleFactor;
-            mouseY -= boxY + 20;
-            i = (int)mouseY;
-            i = i/9;
-            i = 9-i;
-        }
-        return i;
-    }
     
     public void scroll(int amount) {
         if (focused) {
@@ -200,11 +189,9 @@ public class FishingChatBox {
         }
         cords += " " + (int)client.player.getX() + " " + (int)client.player.getY() + " " + (int)client.player.getZ() + " ";
 
-        //Cords to string
-        //String cords = (int)client.player.getX() + " " + (int)client.player.getY() + " " + (int)client.player.getZ(); //copy in a # # # format to be less verbose for chat
 
         // Check clipboard icon click
-        int iconX = boxWidth - 10; //place icon position from right border instead of left
+        int iconX = boxX + boxWidth - 10; //place icon position from right border instead of left
         if (scaledMouseX >= iconX && scaledMouseX <= iconX + client.textRenderer.getWidth(COPY_ICON) &&
                 scaledMouseY >= boxY + 5 && scaledMouseY <= boxY + 5 + 9 && button == 0) {
             client.keyboard.setClipboard(cords);

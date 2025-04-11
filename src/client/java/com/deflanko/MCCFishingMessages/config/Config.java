@@ -59,7 +59,8 @@ public class Config {
     ));
     @SerialEntry
     public List<String> blockedPhrases= new ArrayList<>(List.of(
-            "ingo"
-            //,"ntnv"
+            "this is an example of a blocked message",
+            "and this is another example of a blocked phrase"
+            //best not to ship with a phrase that a portion of the community uses.
     ));
 }
