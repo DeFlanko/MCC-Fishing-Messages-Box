@@ -1,9 +1,9 @@
-# MCC Fishing Messages Mod
+# MCCI Fishing Messages Mod
 
 [![Modrinth Downloads][mrdl-img]][mrdl-url] [![Modrinth Latest Version][mrdl-img2]][mrdl-url] [![Modrinth Followers][mrdl-img3]][mrdl-url] [![GitHub Contributers][github-contriuters-img]][github-contrib-url] [![GitHub License][github-lic-img]][github-lic-url]
 
 
-A Minecraft MCC Mod to separate fishing events from the main chat.
+A Minecraft MCCI Mod to separate fishing events from the main chat.
 
 Please report any bugs by opening an [issue](https://github.com/DeFlanko/MCC-Fishing-Messages-Box/issues).
 
