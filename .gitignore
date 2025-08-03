@@ -1,0 +1,8 @@
+# Gradle outputs
+.gradle/
+build/
+run/
+
+# IntelliJ configs
+*.iml
+.idea/

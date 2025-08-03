@@ -4,7 +4,7 @@
 	"package": "com.deflanko.MCCFishingMessages.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-	  "ChatHudMixin", "MouseMixin"
+	  "MouseMixin"
 	],
 	"injectors": {
 	  "defaultRequire": 1

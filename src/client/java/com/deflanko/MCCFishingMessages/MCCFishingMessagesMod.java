@@ -4,9 +4,11 @@ import com.deflanko.MCCFishingMessages.config.ConfigManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.hud.MessageIndicator;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
@@ -24,14 +26,14 @@ public class MCCFishingMessagesMod implements ClientModInitializer {
     private static final Identifier FISHING_NOTIFICATION_HUD_LAYER = Identifier.of("mcc-fishing-messages", "fishing-noti-layer");
     private static List<String> pulledPhrases = new ArrayList<>();
     private static List<String> blockedPhrases = new ArrayList<>();
-    
+
     @Override
     public void onInitializeClient() {
         LOGGER.info("MCC Island Fishing Chat Filter initialized");
-        
+
         // Create our custom chat box
 
-        
+
         // Register mouse handlers
 
         ConfigManager.init();
@@ -51,14 +53,32 @@ public class MCCFishingMessagesMod implements ClientModInitializer {
             });
         }));
 
+        ClientReceiveMessageEvents.ALLOW_GAME.register(
+                (message, a) -> {
+                    if (!isOnMCCIsland()) {
+                        return true;
+                    }
+                    if (isBlockedPhrase(message)) {
+                        return false;
+                    }
+
+                    if (MCCFishingMessagesMod.isPulledPhrase(message)) {
+                        // Add to our custom fishing chat box
+                        MCCFishingMessagesMod.fishingChatBox.addMessage(message, null, MessageIndicator.system());
+
+                        // If the window is visible then steal messages, else cancel.
+                        return !MCCFishingMessagesMod.fishingChatBox.isVisible();
+                    }
+                    return true;
+                }
+        );
+
     }
-    
+
     public static boolean isOnMCCIsland() {
-        return CLIENT.getCurrentServerEntry() != null && 
+        return CLIENT.getCurrentServerEntry() != null &&
                CLIENT.getCurrentServerEntry().address.contains("mccisland.net");
     }
-
-
 
 
     public static boolean isPulledPhrase(Text message) {
