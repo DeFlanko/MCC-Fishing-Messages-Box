@@ -10,7 +10,6 @@ import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +24,7 @@ public class FishingChatBox {
     private static final int MAX_MESSAGES = 100;
     //private static final int MESSAGE_FADE_TIME = 200;
     //private static final int MESSAGE_STAY_TIME = 10000; // 10 seconds
+    // NOTE: color - the text color in the 0xAARRGGBB format; Alpha channel value ranges from 00 (fully transparent) to FF (fully opaque).
     private static final int BACKGROUND_COLOR = 0x80000000; // Semi-transparent black
     private static final int MESSAGE_HEIGHT = 9;
 
@@ -126,12 +126,11 @@ public class FishingChatBox {
         }*/
 
         // Draw title
-        String title = "Fishing Messages  ";
+        String title = "Fishing Messages";
         assert client.player != null;
 
         //Draw Cords
         var pos = client.player.getPos();
-
         //String cords = "X: " + (int) client.player.getX() + " Y: " + (int) client.player.getY() + " Z: " + (int) client.player.getZ();
         String cords = "X: " + (int) pos.x + " Y: " + (int) pos.y + " Z: " + (int) pos.z;
         //MCCFishingMessagesMod.LOGGER.info("Cords value: " + cords); //Works
@@ -140,23 +139,12 @@ public class FishingChatBox {
         if (boxWidth < client.textRenderer.getWidth(cords) + 20 + client.textRenderer.getWidth(title)) {
             title = "";
         }
-
         // Render Title
         context.drawText(client.textRenderer, title, boxX + 5, boxY + 5, 0xFFFFFFFF, true);
 
-        //todo: //Fix this part, it doesn't appear to be rendering in 1.21.8
-
         // Render Cords
-        int textX = boxX + boxWidth - client.textRenderer.getWidth(cords) - 20;
-
-        // Ensure minimum distance from box left edge
-        int minX = boxX + client.textRenderer.getWidth(title) + 10; // 10px padding after title
-        textX = Math.max(textX, minX);
-
-        context.drawText(client.textRenderer, cords, textX, boxY + 5, 0xFFA000, true);
-
-        //int textX = boxX + boxWidth - client.textRenderer.getWidth(cords) - 20;
-        //context.drawText(client.textRenderer, cords, textX, boxY + 5, 0xFFA000, true);
+        int textX = boxX + boxWidth - client.textRenderer.getWidth(cords) - 20; // 20px padding from right edge
+        context.drawText(client.textRenderer, cords, textX, boxY + 5, 0xFFFFAA00, true); // Gold Color
 
         // Add clipboard icon
         int iconX = boxX + (boxWidth - 10);
