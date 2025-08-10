@@ -10,6 +10,7 @@ import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
@@ -127,18 +128,42 @@ public class FishingChatBox {
         // Draw title
         String title = "Fishing Messages  ";
         assert client.player != null;
+
         //Draw Cords
-        String cords = "X: " + (int) client.player.getX() + " Y: " + (int) client.player.getY() + " Z: " + (int) client.player.getZ();
+        var pos = client.player.getPos();
+
+        //String cords = "X: " + (int) client.player.getX() + " Y: " + (int) client.player.getY() + " Z: " + (int) client.player.getZ();
+        String cords = "X: " + (int) pos.x + " Y: " + (int) pos.y + " Z: " + (int) pos.z;
+        //MCCFishingMessagesMod.LOGGER.info("Cords value: " + cords); //Works
+
+        //sets title to none if box width is smaller than everything.
         if (boxWidth < client.textRenderer.getWidth(cords) + 20 + client.textRenderer.getWidth(title)) {
             title = "";
-        } //sets title to none if box width is smaller than everything.
+        }
+
+        // Render Title
         context.drawText(client.textRenderer, title, boxX + 5, boxY + 5, 0xFFFFFFFF, true);
-        context.drawText(client.textRenderer, cords, (boxX + boxWidth) - (client.textRenderer.getWidth(cords) + 20), boxY + 5, 0xFFA000, true);
-        //draw a line to underline Title area
-        context.drawBorder(boxX, boxY + 16, boxWidth, 1, 0xFFFFFFFF);
+
+        //todo: //Fix this part, it doesn't appear to be rendering in 1.21.8
+
+        // Render Cords
+        int textX = boxX + boxWidth - client.textRenderer.getWidth(cords) - 20;
+
+        // Ensure minimum distance from box left edge
+        int minX = boxX + client.textRenderer.getWidth(title) + 10; // 10px padding after title
+        textX = Math.max(textX, minX);
+
+        context.drawText(client.textRenderer, cords, textX, boxY + 5, 0xFFA000, true);
+
+        //int textX = boxX + boxWidth - client.textRenderer.getWidth(cords) - 20;
+        //context.drawText(client.textRenderer, cords, textX, boxY + 5, 0xFFA000, true);
+
         // Add clipboard icon
         int iconX = boxX + (boxWidth - 10);
         context.drawText(client.textRenderer, COPY_ICON, iconX, boxY + 5, COPY_ICON_COLOR, true);
+
+        //draw a line to underline Title area
+        context.drawBorder(boxX, boxY + 16, boxWidth, 1, 0xFFFFFFFF);
 
         // Check if mouse is hovering over icon
         if (client.inGameHud.getChatHud().isChatFocused() && mouseX >= iconX * guiScaleFactor && mouseX <= iconX * guiScaleFactor + client.textRenderer.getWidth(COPY_ICON) &&
@@ -147,8 +172,11 @@ public class FishingChatBox {
         }
 
         //apply font size
-        context.getMatrices().push();
-        context.getMatrices().scale(fontSize, fontSize, fontSize);
+        //context.getMatrices().push();
+        //context.getMatrices().scale(fontSize, fontSize, fontSize);
+
+        var matrices = context.getMatrices();
+        matrices.scale(fontSize, fontSize);
 
         //context.drawText(client.textRenderer, String.valueOf(maxVisibleMessages), boxWidth - 10, boxY + 5, 0xFFFFFFFF, true );
         int fontMarginWidth = (int) (boxWidth / fontSize) - 5;
@@ -182,7 +210,9 @@ public class FishingChatBox {
             }
         }
 
-        context.getMatrices().pop();
+        //context.getMatrices().pop();
+        matrices.scale(1/fontSize, 1/fontSize); // Reset scale
+        //matrices.translate(originalX, originalY); // Reset position
         //check for hover text
 
         if (visible && client.inGameHud.getChatHud().isChatFocused() && MouseWithinBox(mouseX, mouseY)) {

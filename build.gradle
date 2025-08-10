@@ -1,9 +1,9 @@
 plugins {
-    id 'fabric-loom' version '1.10-SNAPSHOT'
+    id 'fabric-loom' version '1.11-SNAPSHOT'
     id 'maven-publish'
 }
 
-version = '1.1.2+1.21.5'
+version = '1.1.2+1.21.8'
 group = 'com.deflanko'
 archivesBaseName = 'mcc-fishing-messages'
 
@@ -42,6 +42,8 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    //TESTING Coords in 1.21.8
+    modImplementation "net.fabricmc.fabric-api:fabric-rendering-v1"
 }
 
 processResources {

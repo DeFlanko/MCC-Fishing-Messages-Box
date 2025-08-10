@@ -5,8 +5,12 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
+//import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
+//import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
+//import net.fabricmc.fabric.api.client.rendering.v1.InGameHudEvents; //for 1.21.9+
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+//import net.fabricmc.fabric.api.client.rendering.v1.DebugHudRenderCallback;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.MessageIndicator;
 import net.minecraft.text.Text;
@@ -23,18 +27,13 @@ public class MCCFishingMessagesMod implements ClientModInitializer {
     public static final MinecraftClient CLIENT = MinecraftClient.getInstance();
     public static FishingChatBox fishingChatBox;
     public static final String MODID = "mccfishingmessages";
-    private static final Identifier FISHING_NOTIFICATION_HUD_LAYER = Identifier.of("mcc-fishing-messages", "fishing-noti-layer");
+    //private static final Identifier FISHING_NOTIFICATION_HUD_LAYER = Identifier.of("mcc-fishing-messages", "fishing-noti-layer");
     private static List<String> pulledPhrases = new ArrayList<>();
     private static List<String> blockedPhrases = new ArrayList<>();
 
     @Override
     public void onInitializeClient() {
         LOGGER.info("MCC Island Fishing Chat Filter initialized");
-
-        // Create our custom chat box
-
-
-        // Register mouse handlers
 
         ConfigManager.init();
         ConfigManager.loadWithFailureBackup();
@@ -44,15 +43,23 @@ public class MCCFishingMessagesMod implements ClientModInitializer {
         fishingChatBox = new FishingChatBox(CLIENT, ConfigManager.instance());
 
         InputHandler.init();
-        // Register the HUD renderer
-        HudLayerRegistrationCallback.EVENT.register((layeredDrawerWrapper -> {
-            layeredDrawerWrapper.attachLayerBefore(IdentifiedLayer.CHAT, FISHING_NOTIFICATION_HUD_LAYER, (drawContext, tickCounter) -> {
-                if (CLIENT.player != null && isOnMCCIsland()) {
-                    fishingChatBox.render(drawContext, CLIENT.mouse.getX(), CLIENT.mouse.getY(), tickCounter);
-                }
-            });
-        }));
 
+//        // Register the HUD renderer
+//        HudLayerRegistrationCallback.EVENT.register((layeredDrawerWrapper -> {
+//            layeredDrawerWrapper.attachLayerBefore(IdentifiedLayer.CHAT, FISHING_NOTIFICATION_HUD_LAYER, (drawContext, tickCounter) -> {
+//                if (CLIENT.player != null && isOnMCCIsland()) {
+//                    fishingChatBox.render(drawContext, CLIENT.mouse.getX(), CLIENT.mouse.getY(), tickCounter);
+//                }
+//            });
+//        }));
+        // Register the HUD renderer using the new Fabric API event
+        //InGameHudEvents.HUD_RENDER.register((matrices, tickDelta) -> { //For 1.21.9+
+        HudRenderCallback.EVENT.register((matrices, tickDelta) -> {
+            if (CLIENT.player != null && isOnMCCIsland()) {
+                // You may want to use mouse coordinates or a fixed position
+                fishingChatBox.render(matrices, CLIENT.mouse.getX(), CLIENT.mouse.getY(), tickDelta);
+            }
+        });
         ClientReceiveMessageEvents.ALLOW_GAME.register(
                 (message, a) -> {
                     if (!isOnMCCIsland()) {
