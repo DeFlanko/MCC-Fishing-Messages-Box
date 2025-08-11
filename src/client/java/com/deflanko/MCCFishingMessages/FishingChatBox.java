@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 //import net.minecraft.client.font.TextRenderer;
 //import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
+
 import java.util.*;
 
 public class FishingChatBox {
@@ -59,6 +60,7 @@ public class FishingChatBox {
     private static final int COPY_ICON_COLOR = 0xFF00DCFF;
 
     private final FishingLocation location = new FishingLocation();
+    private final FishingSpot perks = new FishingSpot("", new ArrayList<>(), null);;
 
     public FishingChatBox(MinecraftClient client, Config config) {
         this.client = client;
@@ -317,8 +319,9 @@ public class FishingChatBox {
         if (!islandText.isEmpty()) {
             cords = islandText + " ";
         }
-        cords += " " + (int) client.player.getX() + " " + (int) client.player.getY() + " " + (int) client.player.getZ() + " ";
-
+        //todo: add perks to cords
+        //cords += " " + (int) client.player.getX() + " " + (int) client.player.getY() + " " + (int) client.player.getZ() + " ";
+        cords += " " + (int) client.player.getX() + " " + (int) client.player.getY() + " " + (int) client.player.getZ() + " " + perks.toString() + " ";
 
         // Check clipboard icon click
         int iconX = boxX + boxWidth - 10; //place icon position from right border instead of left
