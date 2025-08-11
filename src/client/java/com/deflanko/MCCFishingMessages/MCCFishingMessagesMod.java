@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 //import net.fabricmc.fabric.api.client.rendering.v1.InGameHudEvents; //for 1.21.9+
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 //import net.fabricmc.fabric.api.client.rendering.v1.DebugHudRenderCallback;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.MessageIndicator;
@@ -43,6 +44,7 @@ public class MCCFishingMessagesMod implements ClientModInitializer {
         fishingChatBox = new FishingChatBox(CLIENT, ConfigManager.instance());
 
         InputHandler.init();
+
 
 //        // Register the HUD renderer
 //        HudLayerRegistrationCallback.EVENT.register((layeredDrawerWrapper -> {
@@ -79,7 +81,12 @@ public class MCCFishingMessagesMod implements ClientModInitializer {
                     return true;
                 }
         );
-
+        // Register the tick callback
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client.player != null) {
+                FishingSpot.checkFishing();
+            }
+        });
     }
 
     public static boolean isOnMCCIsland() {

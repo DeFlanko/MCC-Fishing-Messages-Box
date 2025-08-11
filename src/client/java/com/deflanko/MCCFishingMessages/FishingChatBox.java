@@ -60,7 +60,9 @@ public class FishingChatBox {
     private static final int COPY_ICON_COLOR = 0xFF00DCFF;
 
     private final FishingLocation location = new FishingLocation();
-    private final FishingSpot perks = new FishingSpot("", new ArrayList<>(), null);;
+    private static FishingSpot getPerks() {
+        return FishingSpot.getCurrentFishingSpot();
+    }
 
     public FishingChatBox(MinecraftClient client, Config config) {
         this.client = client;
@@ -321,7 +323,12 @@ public class FishingChatBox {
         }
         //todo: add perks to cords
         //cords += " " + (int) client.player.getX() + " " + (int) client.player.getY() + " " + (int) client.player.getZ() + " ";
-        cords += " " + (int) client.player.getX() + " " + (int) client.player.getY() + " " + (int) client.player.getZ() + " " + perks.toString() + " ";
+        FishingSpot currentSpot = getPerks();
+        String perksText = currentSpot != null ? currentSpot.toString() : "";
+        cords += " " + (int) client.player.getX() + " " + (int) client.player.getY() + " " + (int) client.player.getZ();
+        if (!perksText.isEmpty()) {
+            cords += " " + perksText;
+        }
 
         // Check clipboard icon click
         int iconX = boxX + boxWidth - 10; //place icon position from right border instead of left
