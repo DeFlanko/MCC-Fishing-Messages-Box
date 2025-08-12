@@ -46,7 +46,12 @@ TODO: support for ModMenu
 
 ![image](https://github.com/DeFlanko/MCC-Fishing-Messages-Box/blob/main/github_assets/Animation.gif)
 
-Big thanks to **jstnf** & **Tytries**
+
+## Project Contributors
+<a href="https://github.com/DeFlanko/MCC-Fishing-Messages-Box/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=DeFlanko/MCC-Fishing-Messages-Box" />
+</a>
+
 
  <!--Badges-->
 
