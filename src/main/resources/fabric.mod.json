@@ -21,13 +21,15 @@
 	],
 	"contact": {
 		"homepage": "https://github.com/DeFlanko/MCC-Fishing-Messages-Box",
-	  	"sources": "https://github.com/DeFlanko/MCC-Fishing-Messages-Box"
+	  	"sources": "https://github.com/DeFlanko/MCC-Fishing-Messages-Box",
+        "issues": "https://github.com/DeFlanko/MCC-Fishing-Messages-Box/issues"
 		},
 	"license": "MIT",
 	"environment": "client",
 	"entrypoints": {
 	  	"client": ["com.deflanko.MCCFishingMessages.MCCFishingMessagesMod"]
-		},
+    },
+
 	"mixins": ["MCCFishingMessages.mixins.json"],
 	"depends": {
 	  	"fabricloader": ">=0.17.2",
