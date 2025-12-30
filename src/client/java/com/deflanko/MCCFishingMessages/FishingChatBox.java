@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 //import net.minecraft.text.Style;
 //import net.minecraft.client.font.TextRenderer;
 //import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-
+import net.minecraft.util.math.Vec3d; // if needed
 
 import java.util.*;
 
@@ -84,6 +84,32 @@ public class FishingChatBox {
         backupHeight = boxHeight;
         backupWidth = boxWidth;
     }
+    //new for 1.21.11
+    private static void drawBorder(DrawContext context, int x, int y, int w, int h, int color) {
+        // top
+        context.fill(x, y, x + w, y + 1, color);
+        // bottom
+        context.fill(x, y + h - 1, x + w, y + h, color);
+        // left
+        context.fill(x, y, x + 1, y + h, color);
+        // right
+        context.fill(x + w - 1, y, x + w, y + h, color);
+    }
+
+    private Style resolveStyleSafely(OrderedText text, int x) {
+        try {
+            Object handler = this.client.textRenderer.getTextHandler();
+            String[] candidates = {"getStyleAt", "getStyle", "getStyleAtPos"};
+            for (String name : candidates) {
+                try {
+                    java.lang.reflect.Method m = handler.getClass().getMethod(name, OrderedText.class, int.class);
+                    Object res = m.invoke(handler, text, x);
+                    if (res instanceof Style) return (Style) res;
+                } catch (NoSuchMethodException ignored) {}
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
 
     public void render(DrawContext context, double mouseX, double mouseY, RenderTickCounter tickCounter) {
         if (macDisplay) {
@@ -110,9 +136,11 @@ public class FishingChatBox {
                 boxWidth = backupWidth;
             }
         }
+        //new for 1.21.11
         if (focused) {
-            context.drawBorder(boxX, boxY, boxWidth + 2, boxHeight + 2, 0xFFFFFFFF);
+            drawBorder(context, boxX, boxY, boxWidth + 2, boxHeight + 2, 0xFFFFFFFF);
         }
+
         /*if (debug) {  //debug stuff, prolly leave disabled
             boolean hovered = (visible && client.inGameHud.getChatHud().isChatFocused() && MouseWithinBox(mouseX, mouseY));
             int i = hovered ? 0xFF00FF00 : 0xFFFF0000;
@@ -134,7 +162,10 @@ public class FishingChatBox {
         assert client.player != null;
 
         //Draw Cords
-        var pos = client.player.getPos();
+        //var pos = client.player.getPos();
+        //new for 1.21.11
+        Vec3d pos = new Vec3d(client.player.getX(), client.player.getY(), client.player.getZ());
+
         //String cords = "X: " + (int) client.player.getX() + " Y: " + (int) client.player.getY() + " Z: " + (int) client.player.getZ();
         String cords = "X: " + (int) pos.x + " Y: " + (int) pos.y + " Z: " + (int) pos.z;
         //MCCFishingMessagesMod.LOGGER.info("Cords value: " + cords); //Works
@@ -155,7 +186,9 @@ public class FishingChatBox {
         context.drawText(client.textRenderer, COPY_ICON, iconX, boxY + 5, COPY_ICON_COLOR, true);
 
         //draw a line to underline Title area
-        context.drawBorder(boxX, boxY + 16, boxWidth, 1, 0xFFFFFFFF);
+        // context.drawBorder(boxX, boxY + 16, boxWidth, 1, 0xFFFFFFFF);
+        //new for 1.21.11
+        drawBorder(context, boxX, boxY + 16, boxWidth, 1, 0xFFFFFFFF);
 
         // Check if mouse is hovering over icon
         if (client.inGameHud.getChatHud().isChatFocused() && mouseX >= iconX * guiScaleFactor && mouseX <= iconX * guiScaleFactor + client.textRenderer.getWidth(COPY_ICON) &&
@@ -216,7 +249,10 @@ public class FishingChatBox {
             if (lineIndex >= 0 && lineIndex < onScreenMessages.size()) {
                 int translatedMouseX = (int) Math.floor(((mouseX / guiScaleFactor)-boxX) / fontSize);
                 if (translatedMouseX > 0) {
-                    Style style = this.client.textRenderer.getTextHandler().getStyleAt(onScreenMessages.get(lineIndex), translatedMouseX);
+                    //Style style = this.client.textRenderer.getTextHandler().getStyleAt(onScreenMessages.get(lineIndex), translatedMouseX);
+                    //updated for 1.21.11
+                    Style style = resolveStyleSafely(onScreenMessages.get(lineIndex), translatedMouseX);
+                    //Style style = this.client.textRenderer.getTextHandler().getStyle(onScreenMessages.get(lineIndex), translatedMouseX);
                     if (style != null && style.getHoverEvent() != null) {
                         context.drawHoverEvent(this.client.textRenderer, style, scaledX, scaledY);
                     }

@@ -75,7 +75,9 @@ public class FishingSpot{
 
         BlockPos blockPos = fishHook.getBlockPos();
         Box box = Box.of(blockPos.toCenterPos(), 3.5, 6.0, 3.5);
-        List<Entity> entities = player.getWorld().getOtherEntities(null, box)
+        //List<Entity> entities = player.getWorld().getOtherEntities(null, box)
+        //New for 1.21.11
+        List<Entity> entities = MinecraftClient.getInstance().world.getOtherEntities(null, box)
                 .stream()
                 .filter(entity -> entity instanceof DisplayEntity.TextDisplayEntity)
                 .toList();
