@@ -2,6 +2,7 @@ package com.deflanko.MCCFishingMessages.mixin;
 
 import com.deflanko.MCCFishingMessages.MCCFishingMessagesMod;
 import net.minecraft.client.Mouse;
+import net.minecraft.client.input.MouseInput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,13 +17,12 @@ public class MouseMixin {
         }
     }
 
-    
-    @Inject(method = "onMouseButton", at = @At("RETURN"))
-    private void onMouseButton(long window, int button, int action, int mods, CallbackInfo ci) {
+    @Inject(method = "onMouseButton", at = @At("HEAD"))
+    private void onMouseButton(long window, MouseInput input, int action, CallbackInfo ci) {
         if (MCCFishingMessagesMod.isOnMCCIsland() && MCCFishingMessagesMod.fishingChatBox != null && action == 1) { // 1 = press
             double x = MCCFishingMessagesMod.CLIENT.mouse.getX();
             double y = MCCFishingMessagesMod.CLIENT.mouse.getY();
-            MCCFishingMessagesMod.fishingChatBox.mouseClicked(x, y, button);
+            MCCFishingMessagesMod.fishingChatBox.mouseClicked(x, y, input.button());
         }
     }
 }

@@ -1,11 +1,15 @@
 plugins {
-    id 'fabric-loom' version '1.11-SNAPSHOT'
+    id 'fabric-loom' version '1.14.9' //23-Dec-2025 20:20 - https://maven.fabricmc.net/fabric-loom/fabric-loom.gradle.plugin/
+    id 'java'
     id 'maven-publish'
 }
 
-version = '1.1.5+1.21.8'
+version = "${project.minecraft_version}" //project.minecraft_version //'1.21.11'
 group = 'com.deflanko'
-archivesBaseName = 'mcc-fishing-messages'
+// Update the pointer to change the base name of the generated archives
+ext {
+    archives_base_name = 'mcc-fishing-messages'
+}
 
 repositories {
     mavenCentral()
@@ -37,7 +41,7 @@ dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "net.minecraft:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
@@ -68,7 +72,9 @@ java {
 }
 
 jar {
-	inputs.property "archivesName", project.base.archivesName
+    // set the archive/base name properly
+    archiveBaseName.set(archives_base_name)
+    inputs.property("archivesName", archives_base_name)
 
 	from("LICENSE") {
 		rename { "${it}_${inputs.properties.archivesName}"}
