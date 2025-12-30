@@ -1,6 +1,6 @@
 # MCCI Fishing Messages Mod
 
-[![Modrinth Downloads][mrdl-img]][mrdl-url] [![Modrinth Latest Version][mrdl-img2]][mrdl-url] [![Modrinth Followers][mrdl-img3]][mrdl-url] [![GitHub Contributers][github-contriuters-img]][github-contrib-url] [![GitHub License][github-lic-img]][github-lic-url]
+[![Modrinth Latest Version][mrdl-img2]][mrdl-url] [![Modrinth Downloads][mrdl-img]][mrdl-url] [![Github-file-size]][mrdl-url] [![Modrinth Followers][mrdl-img3]][mrdl-url] [![github-last-commit]][mrdl-url] [![GitHub Contributers][github-contriuters-img]][github-contrib-url] [![GitHub License][github-lic-img]][github-lic-url]
 
 
 A Minecraft MCCI Mod to separate fishing events from the main chat.
@@ -64,6 +64,8 @@ TODO: support for ModMenu
 [mrdl-img3]: https://img.shields.io/modrinth/followers/n6bUWXx1
 [mrdl-url]: https://modrinth.com/mod/mcc-fishing-messages-mod
 
+[github-last-commit]: https://img.shields.io/github/last-commit/deflanko/MCC-Fishing-Messages-Box.svg?style=flat-rounded-square
+[github-file-size]:https://img.shields.io/github/languages/code-size/DeFlanko/MCC-Fishing-Messages-Box.svg?color=purple&style=flat-rounded-square
 [github-contriuters-img]: https://img.shields.io/github/contributors/deflanko/MCC-Fishing-Messages-Box
 [github-contrib-url]: https://github.com/DeFlanko/MCC-Fishing-Messages-Box/graphs/contributors
 [github-lic-img]: https://img.shields.io/github/license/deflanko/MCC-Fishing-Messages-Box
