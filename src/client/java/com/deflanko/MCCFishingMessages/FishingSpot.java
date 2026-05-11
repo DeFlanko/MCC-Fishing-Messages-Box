@@ -1,13 +1,13 @@
 package com.deflanko.MCCFishingMessages;
 
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.util.math.Box;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
 
 
 import java.util.Arrays;
@@ -22,7 +22,7 @@ public class FishingSpot{
 
     private final String location;
     private final List<String> perks;
-    private final DisplayEntity.TextDisplayEntity entity;
+    private final Display.TextDisplay entity;
 
     public static FishingSpot getCurrentFishingSpot() {
         return currentFishingSpot;
@@ -36,24 +36,24 @@ public class FishingSpot{
         return location;
     }
 
-    public FishingSpot(String location, List<String> perks, DisplayEntity.TextDisplayEntity entity) {
+    public FishingSpot(String location, List<String> perks, Display.TextDisplay entity) {
         this.location = location;
         this.perks = perks;
         this.entity = entity;
     }
 
-    public DisplayEntity.TextDisplayEntity getEntity() {
+    public Display.TextDisplay getEntity() {
         return entity;
     }
 
     public static void checkFishing() {
-        PlayerEntity player = MinecraftClient.getInstance().player;
+        Player player = Minecraft.getInstance().player;
 
         if (player == null) {
             return;
         }
 
-        FishingBobberEntity fishHook = player.fishHook;
+        FishingHook fishHook = player.fishing;
 
         // Fix the logical flow to prevent NPE
         if (fishHook == null) {
@@ -64,26 +64,26 @@ public class FishingSpot{
             return;
         }
 
-        if (fishHook.isInFluid() && !isFishing) {
+        if (fishHook.isInLiquid() && !isFishing) {
             isFishing = true;
             waitTime = 0;
             getFishingSpot(player, fishHook);
         }
     }
 
-    private static void getFishingSpot(PlayerEntity player, FishingBobberEntity fishHook) {
+    private static void getFishingSpot(Player player, FishingHook fishHook) {
 
-        BlockPos blockPos = fishHook.getBlockPos();
-        Box box = Box.of(blockPos.toCenterPos(), 3.5, 6.0, 3.5);
+        BlockPos blockPos = fishHook.blockPosition();
+        AABB box = AABB.ofSize(blockPos.getCenter(), 3.5, 6.0, 3.5);
         //List<Entity> entities = player.getWorld().getOtherEntities(null, box)
         //New for 1.21.11
-        List<Entity> entities = MinecraftClient.getInstance().world.getOtherEntities(null, box)
+        List<Entity> entities = Minecraft.getInstance().level.getEntities(null, box)
                 .stream()
-                .filter(entity -> entity instanceof DisplayEntity.TextDisplayEntity)
+                .filter(entity -> entity instanceof Display.TextDisplay)
                 .toList();
 
         if (!entities.isEmpty()) {
-            DisplayEntity.TextDisplayEntity textDisplay = (DisplayEntity.TextDisplayEntity) entities.getFirst();
+            Display.TextDisplay textDisplay = (Display.TextDisplay) entities.getFirst();
             if (currentFishingSpot != null && currentFishingSpot.getEntity().equals(textDisplay)) {
                 return;
             }

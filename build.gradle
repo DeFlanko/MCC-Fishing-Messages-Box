@@ -1,14 +1,14 @@
 plugins {
-    id 'fabric-loom' version '1.14.9' //23-Dec-2025 20:20 - https://maven.fabricmc.net/fabric-loom/fabric-loom.gradle.plugin/
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
     id 'java'
     id 'maven-publish'
 }
 
-version = "${project.minecraft_version}" //project.minecraft_version //'1.21.11'
-group = 'com.deflanko'
+version = project.minecraft_version
+group = project.maven_group
 // Update the pointer to change the base name of the generated archives
 ext {
-    archives_base_name = 'mcc-fishing-messages'
+    archives_base_name = project.archives_base_name
 }
 
 repositories {
@@ -20,6 +20,7 @@ repositories {
 }
 loom {
 	splitEnvironmentSourceSets()
+	accessWidenerPath = file("src/client/resources/MCCFishingMessages.classtweaker")
 
 	mods {
 		"mcc-fishing-messages" {
@@ -40,12 +41,11 @@ loom {
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "net.minecraft:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+    implementation "net.fabricmc:fabric-loader:${loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 
 }
 
@@ -58,7 +58,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+	it.options.release = 25
 }
 
 java {
@@ -67,8 +67,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {

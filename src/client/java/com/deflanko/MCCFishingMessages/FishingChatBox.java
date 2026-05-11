@@ -2,22 +2,19 @@ package com.deflanko.MCCFishingMessages;
 
 import com.deflanko.MCCFishingMessages.config.Config;
 import com.deflanko.MCCFishingMessages.config.ConfigManager;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.client.gui.hud.MessageIndicator;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.network.message.MessageSignatureData;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
+import net.minecraft.client.multiplayer.chat.GuiMessageSource;
+import net.minecraft.client.multiplayer.chat.GuiMessageTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-//import net.minecraft.client.main.Main;
-//import net.minecraft.text.Style;
-//import net.minecraft.client.font.TextRenderer;
-//import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.util.math.Vec3d; // if needed
 
 import java.util.*;
 
@@ -29,7 +26,7 @@ public class FishingChatBox {
     private static final int BACKGROUND_COLOR = 0x80000000; // Semi-transparent black
     private static final int MESSAGE_HEIGHT = 9;
 
-    private final MinecraftClient client;
+    private final Minecraft client;
     private final Deque<ChatMessage> messages = new LinkedList<>();
     private int scrollOffset = 0;
     private boolean focused = false;
@@ -56,7 +53,7 @@ public class FishingChatBox {
     private boolean macDisplay;
 
     // Add at the top of the class
-    private static final Text COPY_ICON = Text.literal("📋");
+    private static final Component COPY_ICON = Component.literal("📋");
     private static final int COPY_ICON_COLOR = 0xFF00DCFF;
 
     private final FishingLocation location = new FishingLocation();
@@ -64,7 +61,7 @@ public class FishingChatBox {
         return FishingSpot.getCurrentFishingSpot();
     }
 
-    public FishingChatBox(MinecraftClient client, Config config) {
+    public FishingChatBox(Minecraft client, Config config) {
         this.client = client;
         this.boxX = config.boxX;
         this.boxY = config.boxY;
@@ -85,7 +82,7 @@ public class FishingChatBox {
         backupWidth = boxWidth;
     }
     //new for 1.21.11
-    private static void drawBorder(DrawContext context, int x, int y, int w, int h, int color) {
+    private static void drawBorder(GuiGraphicsExtractor context, int x, int y, int w, int h, int color) {
         // top
         context.fill(x, y, x + w, y + 1, color);
         // bottom
@@ -96,13 +93,13 @@ public class FishingChatBox {
         context.fill(x + w - 1, y, x + w, y + h, color);
     }
 
-    private Style resolveStyleSafely(OrderedText text, int x) {
+    private Style resolveStyleSafely(FormattedCharSequence text, int x) {
         try {
-            Object handler = this.client.textRenderer.getTextHandler();
+            Object handler = this.client.font.getSplitter();
             String[] candidates = {"getStyleAt", "getStyle", "getStyleAtPos"};
             for (String name : candidates) {
                 try {
-                    java.lang.reflect.Method m = handler.getClass().getMethod(name, OrderedText.class, int.class);
+                    java.lang.reflect.Method m = handler.getClass().getMethod(name, FormattedCharSequence.class, int.class);
                     Object res = m.invoke(handler, text, x);
                     if (res instanceof Style) return (Style) res;
                 } catch (NoSuchMethodException ignored) {}
@@ -111,7 +108,7 @@ public class FishingChatBox {
         return null;
     }
 
-    public void render(DrawContext context, double mouseX, double mouseY, RenderTickCounter tickCounter) {
+    public void render(GuiGraphicsExtractor context, double mouseX, double mouseY, DeltaTracker tickCounter) {
         if (macDisplay) {
             mouseX *= 2;
             mouseY *= 2;
@@ -119,13 +116,13 @@ public class FishingChatBox {
         int scaledX = (int) (mouseX / guiScaleFactor);
         int scaledY = (int) (mouseY / guiScaleFactor);
 
-        if (!visible || messages.isEmpty() || client.getDebugHud().shouldShowDebugHud()) return;
+        if (!visible || messages.isEmpty() || client.getDebugOverlay().showDebugScreen()) return;
 
         // Draw background
         context.fill(boxX, boxY, boxX + boxWidth, boxY + boxHeight, BACKGROUND_COLOR);
 
         //unfocus the box with chat unfocused
-        if (focused && !client.inGameHud.getChatHud().isChatFocused()) {
+        if (focused && !client.gui.getChat().isChatFocused()) {
             focused = false;
             scrollOffset = 0; //reset scroll offset to 0 to warp box back to the bottom
             if (state != EditState.NONE) {
@@ -142,16 +139,16 @@ public class FishingChatBox {
         }
 
         /*if (debug) {  //debug stuff, prolly leave disabled
-            boolean hovered = (visible && client.inGameHud.getChatHud().isChatFocused() && MouseWithinBox(mouseX, mouseY));
+            boolean hovered = (visible && client.gui.getChat().isChatFocused() && MouseWithinBox(mouseX, mouseY));
             int i = hovered ? 0xFF00FF00 : 0xFFFF0000;
             context.fill(boxX + boxWidth - 10, boxY + boxHeight - 10, boxX + boxWidth, boxY + boxHeight, i);
             String width = "BoxX: " + boxX + "  Box Width: " + boxWidth;
             String height = "BoxY: " + boxY + "  Box Height: " + boxHeight;
             String mouse = "MouseX: " + scaledX + "  MouseY: " + scaledY;
-            context.drawText(client.textRenderer, width, boxX + boxWidth + 5, boxY + 10, 0xFFFFFFFF, true);
-            context.drawText(client.textRenderer, height, boxX + boxWidth + 5, boxY + 20, 0xFFFFFFFF, true);
-            context.drawText(client.textRenderer, mouse, boxX + boxWidth + 5, boxY + 30, 0xFFFFFFFF, true);
-            if (client.inGameHud.getChatHud().isChatFocused()) {
+            context.text(client.font, width, boxX + boxWidth + 5, boxY + 10, 0xFFFFFFFF, true);
+            context.text(client.font, height, boxX + boxWidth + 5, boxY + 20, 0xFFFFFFFF, true);
+            context.text(client.font, mouse, boxX + boxWidth + 5, boxY + 30, 0xFFFFFFFF, true);
+            if (client.gui.getChat().isChatFocused()) {
                 //int translatedMouseX = (int) Math.floor((((mouseX / guiScaleFactor)-boxX)/fontSize));
                 context.fill(scaledX, scaledY, scaledX + 10, scaledY + 10, 0xFFFFFFFF);
             }
@@ -164,26 +161,26 @@ public class FishingChatBox {
         //Draw Cords
         //var pos = client.player.getPos();
         //new for 1.21.11
-        Vec3d pos = new Vec3d(client.player.getX(), client.player.getY(), client.player.getZ());
+        Vec3 pos = new Vec3(client.player.getX(), client.player.getY(), client.player.getZ());
 
         //String cords = "X: " + (int) client.player.getX() + " Y: " + (int) client.player.getY() + " Z: " + (int) client.player.getZ();
         String cords = "X: " + (int) pos.x + " Y: " + (int) pos.y + " Z: " + (int) pos.z;
         //MCCFishingMessagesMod.LOGGER.info("Cords value: " + cords); //Works
 
         //sets title to none if box width is smaller than everything.
-        if (boxWidth < client.textRenderer.getWidth(cords) + 20 + client.textRenderer.getWidth(title)) {
+        if (boxWidth < client.font.width(cords) + 20 + client.font.width(title)) {
             title = "";
         }
         // Render Title
-        context.drawText(client.textRenderer, title, boxX + 5, boxY + 5, 0xFFFFFFFF, true);
+        context.text(client.font, title, boxX + 5, boxY + 5, 0xFFFFFFFF, true);
 
         // Render Cords
-        int textX = boxX + boxWidth - client.textRenderer.getWidth(cords) - 20; // 20px padding from right edge
-        context.drawText(client.textRenderer, cords, textX, boxY + 5, 0xFFFFAA00, true); // Gold Color
+        int textX = boxX + boxWidth - client.font.width(cords) - 20; // 20px padding from right edge
+        context.text(client.font, cords, textX, boxY + 5, 0xFFFFAA00, true); // Gold Color
 
         // Add clipboard icon
         int iconX = boxX + (boxWidth - 10);
-        context.drawText(client.textRenderer, COPY_ICON, iconX, boxY + 5, COPY_ICON_COLOR, true);
+        context.text(client.font, COPY_ICON, iconX, boxY + 5, COPY_ICON_COLOR, true);
 
         //draw a line to underline Title area
         // context.drawBorder(boxX, boxY + 16, boxWidth, 1, 0xFFFFFFFF);
@@ -191,16 +188,16 @@ public class FishingChatBox {
         drawBorder(context, boxX, boxY + 16, boxWidth, 1, 0xFFFFFFFF);
 
         // Check if mouse is hovering over icon
-        if (client.inGameHud.getChatHud().isChatFocused() && mouseX >= iconX * guiScaleFactor && mouseX <= iconX * guiScaleFactor + client.textRenderer.getWidth(COPY_ICON) &&
+        if (client.gui.getChat().isChatFocused() && mouseX >= iconX * guiScaleFactor && mouseX <= iconX * guiScaleFactor + client.font.width(COPY_ICON) &&
                 mouseY >= (boxY + 5) * guiScaleFactor && mouseY <= (boxY + 5 + 9) * guiScaleFactor) {
-            context.fill(iconX, boxY + 5, iconX + client.textRenderer.getWidth(COPY_ICON), boxY + 14, 0xAAFFFFFF);
+            context.fill(iconX, boxY + 5, iconX + client.font.width(COPY_ICON), boxY + 14, 0xAAFFFFFF);
         }
 
         //apply font size
-        //context.getMatrices().push();
-        //context.getMatrices().scale(fontSize, fontSize, fontSize);
+        //context.pose().pushPose();
+        //context.pose().scale(fontSize, fontSize, fontSize);
 
-        var matrices = context.getMatrices();
+        var matrices = context.pose();
         matrices.scale(fontSize, fontSize);
 
         //context.drawText(client.textRenderer, String.valueOf(maxVisibleMessages), boxWidth - 10, boxY + 5, 0xFFFFFFFF, true );
@@ -213,19 +210,19 @@ public class FishingChatBox {
         maxVisibleMessages = (int) ((boxHeight - 18) / fontSize) / MESSAGE_HEIGHT;
         List<ChatMessage> visibleMessages = new ArrayList<>(messages);
         int startIndex = Math.max(0, Math.min(scrollOffset, messages.size() - maxVisibleMessages));
-        List<OrderedText> onScreenMessages = new ArrayList<>();
+        List<FormattedCharSequence> onScreenMessages = new ArrayList<>();
         //actually display the messages
         for (int i = startIndex; i < visibleMessages.size() && visibleCount < maxVisibleMessages; i++) {
             ChatMessage message = visibleMessages.get(i);
-            List<OrderedText> wrappedText = new ArrayList<>(client.textRenderer.wrapLines(message.chathudline.content(), fontMarginWidth));
+            List<FormattedCharSequence> wrappedText = new ArrayList<>(client.font.split(message.chathudline.content(), fontMarginWidth));
             reverseList(wrappedText);
             int localSize = 0;
-            for (OrderedText line : wrappedText) {
+            for (FormattedCharSequence line : wrappedText) {
                 if (visibleCount >= maxVisibleMessages) {
                     continue;
                 }
                 localSize++;
-                context.drawText(client.textRenderer, line, xOffset + 5, yOffset, 0xFFFFFFFF, true);
+                context.text(client.font, line, xOffset + 5, yOffset, 0xFFFFFFFF, true);
                 if (message.size < localSize) {
                     message.size = localSize;
                 }
@@ -240,7 +237,7 @@ public class FishingChatBox {
         //matrices.translate(originalX, originalY); // Reset position
         //check for hover text
 
-        if (visible && client.inGameHud.getChatHud().isChatFocused() && MouseWithinBox(mouseX, mouseY)) {
+        if (visible && client.gui.getChat().isChatFocused() && MouseWithinBox(mouseX, mouseY)) {
             int i = (int) Math.floor((mouseY / guiScaleFactor)) - boxY - 17 + (int) Math.floor((MESSAGE_HEIGHT * fontSize) / 2);
             int lineIndex = (int) (i / fontSize) / MESSAGE_HEIGHT;
             lineIndex -= (maxVisibleMessages - Math.min(onScreenMessages.size(), maxVisibleMessages));
@@ -254,7 +251,7 @@ public class FishingChatBox {
                     Style style = resolveStyleSafely(onScreenMessages.get(lineIndex), translatedMouseX);
                     //Style style = this.client.textRenderer.getTextHandler().getStyle(onScreenMessages.get(lineIndex), translatedMouseX);
                     if (style != null && style.getHoverEvent() != null) {
-                        context.drawHoverEvent(this.client.textRenderer, style, scaledX, scaledY);
+                        context.componentHoverEffect(this.client.font, style, scaledX, scaledY);
                     }
                 }
             }
@@ -316,8 +313,8 @@ public class FishingChatBox {
         list.add(value);
     }
 
-    public void addMessage(Text message, @Nullable MessageSignatureData signatureData, @Nullable MessageIndicator indicator) {
-        messages.addFirst(new ChatMessage(new ChatHudLine(client.inGameHud.getTicks(), message, signatureData, indicator)));
+    public void addMessage(Component message, @Nullable MessageSignature signatureData, GuiMessageSource source, @Nullable GuiMessageTag indicator) {
+        messages.addFirst(new ChatMessage(new GuiMessage(client.gui.getGuiTicks(), message, signatureData, source, indicator)));
         while (messages.size() > MAX_MESSAGES) {
             messages.removeLast();
         }
@@ -335,7 +332,7 @@ public class FishingChatBox {
     public void scroll(int amount) {
         amount *= linesPerScroll;
         if (focused) {
-            scrollOffset = MathHelper.clamp(scrollOffset + amount, 0, Math.max(0, messages.size() - maxVisibleMessages));
+            scrollOffset = Mth.clamp(scrollOffset + amount, 0, Math.max(0, messages.size() - maxVisibleMessages));
         }
     }
 
@@ -369,9 +366,9 @@ public class FishingChatBox {
         // Check clipboard icon click
         int iconX = boxX + boxWidth - 10; //place icon position from right border instead of left
         if (button == 0
-                && WithinBounds(iconX, mouseX / guiScaleFactor, iconX + client.textRenderer.getWidth(COPY_ICON))
+                && WithinBounds(iconX, mouseX / guiScaleFactor, iconX + client.font.width(COPY_ICON))
                 && WithinBounds(boxY + 5, mouseY / guiScaleFactor, boxY + 14)) {
-            client.keyboard.setClipboard(cords);
+            client.keyboardHandler.setClipboard(cords);
             // Optional: Add visual feedback
             MCCFishingMessagesMod.LOGGER.info("Copied coordinates to clipboard"); // Debug log
             return;
@@ -414,7 +411,7 @@ public class FishingChatBox {
         // Original focus check
         focused = visible &&
                 MouseWithinBox(mouseX, mouseY) &&
-                button == 0 && client.inGameHud.getChatHud().isChatFocused();
+                button == 0 && client.gui.getChat().isChatFocused();
         if (!focused) {
             scrollOffset = 0;
             state = EditState.NONE;
@@ -464,7 +461,7 @@ public class FishingChatBox {
     }
 
     public void updateGuiScale() {
-        this.guiScaleFactor = client.options.getGuiScale().getValue();
+        this.guiScaleFactor = client.options.guiScale().get();
     }
 
     private enum EditState {
@@ -475,10 +472,10 @@ public class FishingChatBox {
     }
 
     private static class ChatMessage {
-        public ChatHudLine chathudline;
+        public GuiMessage chathudline;
         public int size;
 
-        public ChatMessage(ChatHudLine text) {
+        public ChatMessage(GuiMessage text) {
             this.chathudline = text;
             this.size = 0;
         }

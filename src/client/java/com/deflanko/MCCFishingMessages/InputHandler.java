@@ -1,70 +1,70 @@
 package com.deflanko.MCCFishingMessages;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.Identifier;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class InputHandler {
-    private static KeyBinding toggleVisibilityKey;
-    private static KeyBinding increaseFontSize;
-    private static KeyBinding decreaseFontSize;
-    private static KeyBinding enterEditMode;
+    private static KeyMapping toggleVisibilityKey;
+    private static KeyMapping increaseFontSize;
+    private static KeyMapping decreaseFontSize;
+    private static KeyMapping enterEditMode;
 
     // Define a reusable category for all key bindings
-    private static final KeyBinding.Category MCC_CATEGORY =
-            new KeyBinding.Category(Identifier.of("mccfishingmessages", "category"));
+    private static final KeyMapping.Category MCC_CATEGORY =
+            new KeyMapping.Category(Identifier.fromNamespaceAndPath("mccfishingmessages", "category"));
 
     public static void init() {
         // Register keybinding to toggle chat box visibility
-        toggleVisibilityKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        toggleVisibilityKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "MCC Fish Chatbox Toggle",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_F9,
                 MCC_CATEGORY
         ));
 
-        increaseFontSize = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        increaseFontSize = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "Font Size - Increase",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_BRACKET,
                 MCC_CATEGORY
         ));
 
-        decreaseFontSize = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        decreaseFontSize = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "Font Size - Decrease",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_LEFT_BRACKET,
                 MCC_CATEGORY
         ));
 
-        enterEditMode = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        enterEditMode = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "Enable Edit Mode",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_ALT,
                 MCC_CATEGORY
         ));
 
         // Register mouse handlers through Fabric's event system
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (toggleVisibilityKey.wasPressed()) {
+            while (toggleVisibilityKey.consumeClick()) {
                 // Toggle chat box visibility
                 MCCFishingMessagesMod.fishingChatBox.toggleVisibility();
             }
 
-            while (increaseFontSize.wasPressed()){
+            while (increaseFontSize.consumeClick()){
                 MCCFishingMessagesMod.fishingChatBox.changeFontSize(0.05f);
             }
-            while (decreaseFontSize.wasPressed()){
+            while (decreaseFontSize.consumeClick()){
                 MCCFishingMessagesMod.fishingChatBox.changeFontSize(-0.05f);
             }
-            while (enterEditMode.wasPressed()){
+            while (enterEditMode.consumeClick()){
                 MCCFishingMessagesMod.fishingChatBox.ToggleEditMode();
             }
 
-            /*while (enterDebugMode.wasPressed()){
+            /*while (enterDebugMode.consumeClick()){
                 MCCFishingMessagesMod.fishingChatBox.ToggleDebug();
             }*/
 

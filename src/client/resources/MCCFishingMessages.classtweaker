@@ -1,0 +1,3 @@
+accessWidener v1 official
+
+accessible method net/minecraft/client/gui/GuiGraphicsExtractor componentHoverEffect (Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Style;II)V

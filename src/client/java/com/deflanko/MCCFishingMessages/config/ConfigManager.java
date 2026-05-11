@@ -5,7 +5,7 @@ import com.google.gson.FieldNamingPolicy;
 import net.fabricmc.loader.api.FabricLoader;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -17,7 +17,7 @@ import java.util.Date;
 
 public class ConfigManager {
     public static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("mccfishingmessages.json");
-    public static final Identifier CONFIG_ID = Identifier.of(MCCFishingMessagesMod.MODID, "mccfishingmessages");
+    public static final Identifier CONFIG_ID = Identifier.fromNamespaceAndPath(MCCFishingMessagesMod.MODID, "mccfishingmessages");
 
     private static ConfigClassHandler<Config> config;
 
